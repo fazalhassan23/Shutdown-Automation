@@ -1,0 +1,17 @@
+[Unit]
+Description=Smart Plug Monitor Auto-Shutdown Service
+After=network.target
+
+[Service]
+Type=simple
+# Update the ExecStart path to wherever you place the script on your server
+ExecStart=/bin/bash /opt/server-auto-shutdown/auto_shutdown.sh
+
+# Run as root because the shutdown command requires root privileges
+User=root
+
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target
