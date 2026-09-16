@@ -66,10 +66,11 @@ sudo /opt/server-auto-shutdown/auto_shutdown.sh
 ```
 
 You will be prompted to enter:
-- **Username:** Your name/identifier.
+- **Username:** Your name/identifier (used for the log file location).
 - **Smart Plug IP Address:** E.g., `192.168.1.100`.
 - **Ping Interval:** Time between checks in seconds (e.g., `30`).
-- **Failure Timeout:** Time in seconds before shutting down (e.g., `300` for 5 minutes).
+- **Failure Timeout:** Time in seconds the plug must be offline before triggering a shutdown (e.g., `300` for 5 minutes).
+- **Shutdown Delay:** Once triggered, how many minutes the OS should wait before turning off (e.g., `0` for immediate).
 
 If you ever need to change these settings, you can either delete `/etc/server-auto-shutdown.conf` and run the script again, or edit the file directly using `nano`.
 
