@@ -65,6 +65,37 @@ class APIHandler(http.server.SimpleHTTPRequestHandler):
         else:
             super().do_GET()
 
+    def do_POST(self):
+        if self.path == '/api/config':
+            content_length = int(self.headers.get('Content-Length', 0))
+            post_data = self.rfile.read(content_length)
+            try:
+                new_config = json.loads(post_data.decode('utf-8'))
+                
+                # Read current config to preserve unupdated fields
+                config = read_config()
+                for key, val in new_config.items():
+                    if val is not None and val != "":
+                        config[key] = val
+                
+                # Write back to file
+                with open(CONFIG_FILE, 'w') as f:
+                    for key, val in config.items():
+                        f.write(f'{key}="{val}"\n')
+                
+                self.send_response(200)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "success"}).encode('utf-8'))
+            except Exception as e:
+                self.send_response(400)
+                self.send_header('Content-Type', 'application/json')
+                self.end_headers()
+                self.wfile.write(json.dumps({"status": "error", "message": str(e)}).encode('utf-8'))
+        else:
+            self.send_response(404)
+            self.end_headers()
+
 if __name__ == "__main__":
     print(f"Starting web interface on port {PORT}...")
     server = http.server.ThreadingHTTPServer(('', PORT), APIHandler)

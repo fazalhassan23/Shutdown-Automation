@@ -73,6 +73,9 @@ fail_duration=0
 log_event "Starting auto-shutdown monitor for $TARGET_IP (User: $USERNAME, Offline Timeout: ${FAIL_TIMEOUT}s, Shutdown Delay: ${SHUTDOWN_DELAY}m)..."
 
 while true; do
+    # Reload config dynamically to support Web UI changes
+    source "$CONFIG_FILE"
+
     # Ping the target IP (1 count, 2-second timeout)
     if ping -c 1 -W 2 "$TARGET_IP" &> /dev/null; then
         # Ping successful - reset failure counter
