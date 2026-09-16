@@ -58,16 +58,20 @@ sudo systemctl start auto_shutdown.service
 
 ## 4. Configuration
 
-To configure the monitoring parameters, edit the script directly:
+The script now features an interactive setup. You **must** run it manually one time before starting the background service. This will generate a configuration file at `/etc/server-auto-shutdown.conf`.
 
+Run the interactive setup:
 ```bash
-sudo nano /opt/server-auto-shutdown/auto_shutdown.sh
+sudo /opt/server-auto-shutdown/auto_shutdown.sh
 ```
 
-Modify the following variables at the top of the script:
-- `TARGET_IP="192.168.1.100"` - Your smart plug's IP address.
-- `PING_INTERVAL=30` - Time between ping checks (in seconds).
-- `FAIL_TIMEOUT=300` - Timeout limit before shutdown (in seconds). Default is 300s (5 minutes).
+You will be prompted to enter:
+- **Username:** Your name/identifier.
+- **Smart Plug IP Address:** E.g., `192.168.1.100`.
+- **Ping Interval:** Time between checks in seconds (e.g., `30`).
+- **Failure Timeout:** Time in seconds before shutting down (e.g., `300` for 5 minutes).
+
+If you ever need to change these settings, you can either delete `/etc/server-auto-shutdown.conf` and run the script again, or edit the file directly using `nano`.
 
 ---
 

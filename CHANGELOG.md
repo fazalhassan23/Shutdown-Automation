@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [1.0.0] - 2026-09-16
 
 ### Added
+- **Interactive Setup:** The script now prompts the user for their username, smart plug IP, ping interval, and timeout limit on its first run, saving settings to `/etc/server-auto-shutdown.conf`.
 - **Core Monitoring:** Initial release of the `auto_shutdown.sh` monitor script.
 - **Configurable Settings:** Variables for target IP, ping interval, and timeout limit.
 - **Daemon Integration:** Integrated `systemd` service file (`auto_shutdown.service`) for running as a headless daemon.
