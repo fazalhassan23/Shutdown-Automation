@@ -1,0 +1,19 @@
+[Unit]
+Description=Auto-Shutdown Web Interface
+After=network.target
+
+[Service]
+Type=simple
+# Ensure the python script path matches your installation directory
+ExecStart=/usr/bin/python3 /opt/server-auto-shutdown/web_ui.py
+WorkingDirectory=/opt/server-auto-shutdown
+
+# Can be run as a regular user, provided the user has read access to /etc/server-auto-shutdown.conf
+# and their own home directory for logs. Alternatively, run as root.
+User=root
+
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=multi-user.target

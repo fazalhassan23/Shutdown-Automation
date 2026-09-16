@@ -97,5 +97,9 @@ while true; do
         fi
     fi
     
+    # Write current state to a temp file for the web interface
+    echo "{\"fail_duration\": $fail_duration, \"timestamp\": \"$(date +%s)\"}" > /tmp/auto_shutdown.state
+    chmod 644 /tmp/auto_shutdown.state 2>/dev/null || true
+    
     sleep "$PING_INTERVAL"
 done

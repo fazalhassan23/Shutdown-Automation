@@ -44,15 +44,29 @@ sudo cp auto_shutdown.sh /opt/server-auto-shutdown/
 sudo chmod +x /opt/server-auto-shutdown/auto_shutdown.sh
 ```
 
-### Step 2: Setup the Background Service
-To ensure the script runs automatically in the background even if your server reboots, install the provided `systemd` service.
+### Step 2: Setup the Background Services
+To ensure the scripts run automatically in the background even if your server reboots, install the provided `systemd` services.
 
 ```bash
 sudo cp auto_shutdown.service /etc/systemd/system/
+sudo cp auto_shutdown_web.service /etc/systemd/system/
 sudo systemctl daemon-reload
 sudo systemctl enable auto_shutdown.service
 sudo systemctl start auto_shutdown.service
+sudo systemctl enable auto_shutdown_web.service
+sudo systemctl start auto_shutdown_web.service
 ```
+
+---
+
+## 4. Web Dashboard (Beta)
+
+This project includes a lightweight, built-in web dashboard to view live logs and current status. 
+
+After starting the `auto_shutdown_web.service`, open a web browser and navigate to:
+`http://<YOUR_SERVER_IP>:8080`
+
+The dashboard automatically streams your daily logs and shows a real-time progress bar if the smart plug goes offline!
 
 ---
 
