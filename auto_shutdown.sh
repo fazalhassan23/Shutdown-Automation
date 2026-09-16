@@ -124,6 +124,9 @@ while true; do
             log_event "Target offline for >= timeout threshold. Initiating server shutdown in $SHUTDOWN_DELAY minutes..."
             send_telegram_notification "🚨 <b>SHUTDOWN INITIATED</b>%0ATarget offline for ${FAIL_TIMEOUT}s. Server shutting down in ${SHUTDOWN_DELAY} minutes."
             
+            # Write final state indicating shutdown has been triggered
+            echo "{\"fail_duration\": $fail_duration, \"timestamp\": \"$(date +%s)\", \"shutdown_triggered_at\": \"$(date +%s)\"}" > /tmp/auto_shutdown.state
+            
             # Execute shutdown (requires root/sudo privileges)
             # You can test this script safely by changing 'shutdown -h' to 'echo'
             shutdown -h +$SHUTDOWN_DELAY "Auto-shutdown triggered due to smart plug timeout."

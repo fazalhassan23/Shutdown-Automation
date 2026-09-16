@@ -150,9 +150,22 @@ class APIHandler(http.server.SimpleHTTPRequestHandler):
                 if action == "shutdown":
                     subprocess.run(["shutdown", "-h", "+1", "Manual shutdown triggered from Web UI"])
                     msg = "Shutdown initiated (1 minute delay)."
+                    
+                    state = read_state()
+                    state["shutdown_triggered_at"] = int(datetime.now().timestamp())
+                    state["manual_shutdown"] = True
+                    with open(STATE_FILE, 'w') as f:
+                        json.dump(state, f)
+                        
                 elif action == "cancel":
                     subprocess.run(["shutdown", "-c"])
                     msg = "Shutdown cancelled."
+                    
+                    state = read_state()
+                    state.pop("shutdown_triggered_at", None)
+                    state.pop("manual_shutdown", None)
+                    with open(STATE_FILE, 'w') as f:
+                        json.dump(state, f)
                 else:
                     raise ValueError("Invalid action")
                     
