@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Auto-Shutdown Monitor</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body class="bg-gray-900 text-gray-100 min-h-screen p-8 font-sans">
     <div class="max-w-4xl mx-auto space-y-6">
@@ -17,8 +18,11 @@
             <div class="bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-700">
                 <div class="flex justify-between items-center mb-4">
                     <h2 class="text-xl font-semibold text-blue-400">Configuration</h2>
-                    <button id="edit-btn" onclick="toggleEdit()" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-sm font-medium transition">Edit</button>
-                    <button id="save-btn" onclick="saveConfig()" class="px-3 py-1 bg-green-600 hover:bg-green-500 rounded text-sm font-medium transition hidden">Save</button>
+                    <div class="space-x-2">
+                        <button id="ping-btn" onclick="testPing()" class="px-3 py-1 bg-gray-600 hover:bg-gray-500 rounded text-sm font-medium transition">Test Ping</button>
+                        <button id="edit-btn" onclick="toggleEdit()" class="px-3 py-1 bg-blue-600 hover:bg-blue-500 rounded text-sm font-medium transition">Edit</button>
+                        <button id="save-btn" onclick="saveConfig()" class="px-3 py-1 bg-green-600 hover:bg-green-500 rounded text-sm font-medium transition hidden">Save</button>
+                    </div>
                 </div>
                 
                 <div id="conf-view" class="space-y-2 text-sm">
@@ -26,6 +30,9 @@
                     <p><span class="text-gray-400">Ping Interval:</span> <span id="conf-ping" class="font-mono text-white">-</span> seconds</p>
                     <p><span class="text-gray-400">Timeout Threshold:</span> <span id="conf-timeout" class="font-mono text-white">-</span> seconds</p>
                     <p><span class="text-gray-400">Shutdown Delay:</span> <span id="conf-delay" class="font-mono text-white">-</span> minutes</p>
+                    <p><span class="text-gray-400">Log Retention:</span> <span id="conf-retention" class="font-mono text-white">-</span> days</p>
+                    <p><span class="text-gray-400">Telegram Bot:</span> <span id="conf-bot" class="font-mono text-white">-</span></p>
+                    <p><span class="text-gray-400">Telegram Chat:</span> <span id="conf-chat" class="font-mono text-white">-</span></p>
                 </div>
                 
                 <div id="conf-edit" class="space-y-3 text-sm hidden">
@@ -45,6 +52,18 @@
                         <label class="text-gray-400 block mb-1">Shutdown Delay (minutes):</label>
                         <input type="number" id="input-delay" class="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-white font-mono focus:border-blue-500 focus:outline-none">
                     </div>
+                    <div>
+                        <label class="text-gray-400 block mb-1">Log Retention (days):</label>
+                        <input type="number" id="input-retention" class="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-white font-mono focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="text-gray-400 block mb-1">Telegram Bot Token (Optional):</label>
+                        <input type="text" id="input-bot" class="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-white font-mono focus:border-blue-500 focus:outline-none">
+                    </div>
+                    <div>
+                        <label class="text-gray-400 block mb-1">Telegram Chat ID (Optional):</label>
+                        <input type="text" id="input-chat" class="w-full bg-gray-900 border border-gray-600 rounded px-2 py-1 text-white font-mono focus:border-blue-500 focus:outline-none">
+                    </div>
                 </div>
             </div>
             
@@ -58,7 +77,22 @@
                     <div class="w-full bg-gray-700 rounded-full h-2.5">
                         <div id="fail-progress" class="bg-green-500 h-2.5 rounded-full" style="width: 0%"></div>
                     </div>
+                    
+                    <div class="pt-4 border-t border-gray-700 mt-4">
+                        <h3 class="text-sm font-semibold text-gray-400 mb-2">Manual Actions</h3>
+                        <div class="flex space-x-2">
+                            <button onclick="triggerAction('shutdown')" class="px-4 py-2 bg-red-600 hover:bg-red-500 text-white rounded text-sm font-medium transition">Trigger Shutdown</button>
+                            <button onclick="triggerAction('cancel')" class="px-4 py-2 bg-gray-600 hover:bg-gray-500 text-white rounded text-sm font-medium transition">Cancel Shutdown</button>
+                        </div>
+                    </div>
                 </div>
+            </div>
+        </div>
+        
+        <div class="bg-gray-800 rounded-lg shadow-lg border border-gray-700 overflow-hidden p-4">
+            <h2 class="text-lg font-semibold text-gray-200 mb-4">7-Day History</h2>
+            <div class="h-48 w-full">
+                <canvas id="historyChart"></canvas>
             </div>
         </div>
         
@@ -88,6 +122,9 @@
             document.getElementById('input-ping').value = document.getElementById('conf-ping').textContent;
             document.getElementById('input-timeout').value = document.getElementById('conf-timeout').textContent;
             document.getElementById('input-delay').value = document.getElementById('conf-delay').textContent;
+            document.getElementById('input-retention').value = document.getElementById('conf-retention').textContent;
+            document.getElementById('input-bot').value = document.getElementById('conf-bot').textContent;
+            document.getElementById('input-chat').value = document.getElementById('conf-chat').textContent;
         }
         
         async function saveConfig() {
@@ -98,7 +135,10 @@
                 TARGET_IP: document.getElementById('input-ip').value,
                 PING_INTERVAL: document.getElementById('input-ping').value,
                 FAIL_TIMEOUT: document.getElementById('input-timeout').value,
-                SHUTDOWN_DELAY: document.getElementById('input-delay').value
+                SHUTDOWN_DELAY: document.getElementById('input-delay').value,
+                LOG_RETENTION_DAYS: document.getElementById('input-retention').value,
+                TELEGRAM_BOT_TOKEN: document.getElementById('input-bot').value,
+                TELEGRAM_CHAT_ID: document.getElementById('input-chat').value
             };
             
             try {
@@ -139,6 +179,9 @@
                     document.getElementById('conf-ping').textContent = data.config.PING_INTERVAL || '-';
                     document.getElementById('conf-timeout').textContent = data.config.FAIL_TIMEOUT || '-';
                     document.getElementById('conf-delay').textContent = data.config.SHUTDOWN_DELAY || '0';
+                    document.getElementById('conf-retention').textContent = data.config.LOG_RETENTION_DAYS || '30';
+                    document.getElementById('conf-bot').textContent = data.config.TELEGRAM_BOT_TOKEN || '';
+                    document.getElementById('conf-chat').textContent = data.config.TELEGRAM_CHAT_ID || '';
                 }
                 
                 // State
@@ -190,7 +233,96 @@
             }
         }
 
+        async function testPing() {
+            const btn = document.getElementById('ping-btn');
+            const originalText = btn.textContent;
+            btn.textContent = 'Pinging...';
+            try {
+                const res = await fetch('/api/ping');
+                const data = await res.json();
+                alert(data.message);
+            } catch (e) {
+                alert("Ping failed to execute.");
+            }
+            btn.textContent = originalText;
+        }
+        
+        async function triggerAction(action) {
+            if (action === 'shutdown' && !confirm("Are you sure you want to trigger a manual shutdown?")) return;
+            try {
+                const res = await fetch('/api/action', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ action: action })
+                });
+                const data = await res.json();
+                alert(data.message);
+            } catch (e) {
+                alert("Failed to execute action.");
+            }
+        }
+        
+        let historyChart = null;
+        async function fetchHistory() {
+            try {
+                const res = await fetch('/api/history');
+                if (!res.ok) return;
+                const data = await res.json();
+                
+                const labels = Object.keys(data).sort();
+                const offlineData = labels.map(l => data[l].offline_events);
+                const shutdownData = labels.map(l => data[l].shutdowns);
+                
+                const ctx = document.getElementById('historyChart').getContext('2d');
+                if (historyChart) historyChart.destroy();
+                
+                historyChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: labels,
+                        datasets: [
+                            {
+                                label: 'Offline Events',
+                                data: offlineData,
+                                backgroundColor: 'rgba(234, 179, 8, 0.6)', // yellow-500
+                                borderColor: 'rgba(234, 179, 8, 1)',
+                                borderWidth: 1
+                            },
+                            {
+                                label: 'Shutdowns',
+                                data: shutdownData,
+                                backgroundColor: 'rgba(239, 68, 68, 0.6)', // red-500
+                                borderColor: 'rgba(239, 68, 68, 1)',
+                                borderWidth: 1
+                            }
+                        ]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { color: '#9CA3AF', stepSize: 1 }
+                            },
+                            x: {
+                                ticks: { color: '#9CA3AF' }
+                            }
+                        },
+                        plugins: {
+                            legend: {
+                                labels: { color: '#D1D5DB' }
+                            }
+                        }
+                    }
+                });
+            } catch (e) {
+                console.error("Failed to load history chart", e);
+            }
+        }
+
         fetchStatus();
+        fetchHistory();
         setInterval(fetchStatus, 3000);
     </script>
 </body>

@@ -7,10 +7,19 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.1.0] - 2026-09-16
+
+### Added
+- **Telegram Notifications:** Get instantly alerted on Telegram when the smart plug goes offline and when a shutdown is triggered.
+- **Manual Actions:** Trigger or cancel a shutdown directly from the web dashboard.
+- **Test Ping:** Verify your target IP configuration directly from the dashboard.
+- **Uptime History:** Visual 7-day chart showing offline events and shutdowns.
+- **Log Retention Policy:** Auto-cleans logs older than 30 days (configurable) to save disk space.
+
 ## [1.0.0] - 2026-09-16
 
 ### Added
-- **Beta Web Interface:** Added a lightweight, built-in Python web server (`web_ui.py`) and an HTML dashboard (`index.html`) running on port 8080 to view live server status, config, and daily logs.
+- **Beta Web Interface:** Added a lightweight, built-in Python web server (`web_ui.py`) and an HTML dashboard (`index.html`) running on port 8080 to view live server status, config, and daily logs. Includes dynamic configuration editing.
 - **Daily Human-Readable Logging:** Script now automatically creates daily log files (e.g. `shutdown_YYYY-MM-DD.log`) inside `/home/$USERNAME/shutdown_logs/` for easy tracking.
 - **Shutdown Delay Config:** Added an extra setup prompt to specify how long the OS should wait after triggering the shutdown (e.g. `shutdown -h +5`).
 - **Interactive Setup:** The script now prompts the user for their username, smart plug IP, ping interval, and timeout limit on its first run, saving settings to `/etc/server-auto-shutdown.conf`.
