@@ -70,22 +70,24 @@
             <div class="bg-gray-800 rounded-lg p-6 shadow-lg border border-gray-700">
                 <h2 class="text-xl font-semibold mb-4 text-green-400">Live Status</h2>
                 <div class="space-y-4">
-                    <div>
-                        <p class="text-gray-400 text-sm">Current Fail Duration</p>
-                        <p class="text-4xl font-bold" id="state-fail">0s</p>
-                    </div>
-                    <div class="w-full bg-gray-700 rounded-full h-2.5">
-                        <div id="fail-progress" class="bg-green-500 h-2.5 rounded-full" style="width: 0%"></div>
+                    <div class="mb-2">
+                        <div class="flex justify-between items-end mb-1">
+                            <p class="text-gray-400 text-sm">Current Fail Duration</p>
+                            <p class="text-2xl font-bold leading-none" id="state-fail">0s</p>
+                        </div>
+                        <div class="w-full bg-gray-700 rounded-full h-2.5">
+                            <div id="fail-progress" class="bg-green-500 h-2.5 rounded-full" style="width: 0%"></div>
+                        </div>
                     </div>
                     
-                    <!-- Shutdown Countdown (Hidden by default) -->
-                    <div id="shutdown-container" class="hidden mt-4 bg-red-900/20 border border-red-800 p-4 rounded-lg">
+                    <!-- Shutdown Countdown -->
+                    <div id="shutdown-container" class="mt-4 bg-gray-800 border border-gray-700 p-4 rounded-lg transition-colors duration-300">
                         <div class="flex justify-between items-center mb-1">
-                            <p class="text-red-400 text-sm font-semibold">SHUTDOWN PENDING</p>
-                            <p class="text-red-400 font-mono text-sm" id="shutdown-timer">00:00</p>
+                            <p id="shutdown-label" class="text-gray-400 text-sm font-semibold transition-colors duration-300">SYSTEM NORMAL</p>
+                            <p class="text-gray-400 font-mono text-sm transition-colors duration-300" id="shutdown-timer">--:--</p>
                         </div>
                         <div class="w-full bg-gray-700 rounded-full h-2.5 mt-2">
-                            <div id="shutdown-progress" class="bg-red-500 h-2.5 rounded-full" style="width: 0%"></div>
+                            <div id="shutdown-progress" class="bg-gray-500 h-2.5 rounded-full transition-all duration-300" style="width: 0%"></div>
                         </div>
                     </div>
                     
@@ -207,13 +209,13 @@
                 
                 if (failDuration === 0) {
                     progressBar.className = 'bg-green-500 h-2.5 rounded-full transition-all duration-500';
-                    document.getElementById('state-fail').className = 'text-4xl font-bold text-green-400';
+                    document.getElementById('state-fail').className = 'text-2xl font-bold leading-none text-green-400';
                 } else if (progress < 80) {
                     progressBar.className = 'bg-yellow-500 h-2.5 rounded-full transition-all duration-500';
-                    document.getElementById('state-fail').className = 'text-4xl font-bold text-yellow-400';
+                    document.getElementById('state-fail').className = 'text-2xl font-bold leading-none text-yellow-400';
                 } else {
                     progressBar.className = 'bg-red-500 h-2.5 rounded-full transition-all duration-500';
-                    document.getElementById('state-fail').className = 'text-4xl font-bold text-red-400';
+                    document.getElementById('state-fail').className = 'text-2xl font-bold leading-none text-red-400';
                 }
                 
                 // Shutdown Countdown Logic (Sync state for local timer)
@@ -347,8 +349,17 @@
         // This function updates the progress bar locally every second
         function updateShutdownTimer() {
             const shutdownContainer = document.getElementById('shutdown-container');
+            const shutdownLabel = document.getElementById('shutdown-label');
+            const shutdownTimer = document.getElementById('shutdown-timer');
+            const shutdownProgress = document.getElementById('shutdown-progress');
+            
             if (lastKnownShutdownAt) {
-                shutdownContainer.classList.remove('hidden');
+                // Active State
+                shutdownContainer.className = 'mt-4 bg-red-900/20 border border-red-800 p-4 rounded-lg transition-colors duration-300';
+                shutdownLabel.className = 'text-red-400 text-sm font-semibold transition-colors duration-300';
+                shutdownLabel.textContent = 'SHUTDOWN PENDING';
+                shutdownTimer.className = 'text-red-400 font-mono text-sm transition-colors duration-300';
+                shutdownProgress.className = 'bg-red-500 h-2.5 rounded-full transition-all duration-300';
                 
                 const now = Math.floor(Date.now() / 1000);
                 let elapsedSeconds = now - lastKnownShutdownAt;
@@ -356,12 +367,19 @@
                 
                 let mins = Math.floor(remainingSeconds / 60);
                 let secs = remainingSeconds % 60;
-                document.getElementById('shutdown-timer').textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+                shutdownTimer.textContent = `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
                 
-                let shutdownProgress = shutdownDelaySeconds > 0 ? Math.min(100, (elapsedSeconds / shutdownDelaySeconds) * 100) : 100;
-                document.getElementById('shutdown-progress').style.width = shutdownProgress + '%';
+                let progressPercent = shutdownDelaySeconds > 0 ? Math.min(100, (elapsedSeconds / shutdownDelaySeconds) * 100) : 100;
+                shutdownProgress.style.width = progressPercent + '%';
             } else {
-                shutdownContainer.classList.add('hidden');
+                // Inactive State
+                shutdownContainer.className = 'mt-4 bg-gray-800 border border-gray-700 p-4 rounded-lg transition-colors duration-300';
+                shutdownLabel.className = 'text-gray-400 text-sm font-semibold transition-colors duration-300';
+                shutdownLabel.textContent = 'SYSTEM NORMAL';
+                shutdownTimer.className = 'text-gray-400 font-mono text-sm transition-colors duration-300';
+                shutdownTimer.textContent = '--:--';
+                shutdownProgress.className = 'bg-gray-500 h-2.5 rounded-full transition-all duration-300';
+                shutdownProgress.style.width = '0%';
             }
         }
         
