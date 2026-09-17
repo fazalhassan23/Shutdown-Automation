@@ -11,44 +11,9 @@ CONFIG_FILE="/etc/server-auto-shutdown.conf"
 
 # Check if configuration exists
 if [ ! -f "$CONFIG_FILE" ]; then
-    # If there is no config, check if we are running interactively
-    if [ -t 0 ]; then
-        echo "=========================================="
-        echo " Server Auto-Shutdown Initial Setup"
-        echo "=========================================="
-        
-        if [ "$EUID" -ne 0 ]; then
-            echo "Please run this script with sudo for initial setup."
-            exit 1
-        fi
-
-        read -p "Enter your username (used for log file location): " USERNAME
-        read -p "Enter the smart plug IP address (e.g. 192.168.1.100): " TARGET_IP
-        read -p "Enter the ping interval in seconds (e.g. 30): " PING_INTERVAL
-        read -p "How long should the smart plug be offline (in seconds) before triggering shutdown? (e.g. 300 for 5 mins): " FAIL_TIMEOUT
-        read -p "Once triggered, how many minutes should the OS wait before turning off? (e.g. 0 for immediate): " SHUTDOWN_DELAY
-        read -p "Telegram Bot Token (Optional, press Enter to skip): " TELEGRAM_BOT_TOKEN
-        read -p "Telegram Chat ID (Optional, press Enter to skip): " TELEGRAM_CHAT_ID
-        read -p "Log Retention Days (e.g. 30): " LOG_RETENTION_DAYS
-        
-        echo "USERNAME=\"$USERNAME\"" > "$CONFIG_FILE"
-        echo "TARGET_IP=\"$TARGET_IP\"" >> "$CONFIG_FILE"
-        echo "PING_INTERVAL=\"$PING_INTERVAL\"" >> "$CONFIG_FILE"
-        echo "FAIL_TIMEOUT=\"$FAIL_TIMEOUT\"" >> "$CONFIG_FILE"
-        echo "SHUTDOWN_DELAY=\"$SHUTDOWN_DELAY\"" >> "$CONFIG_FILE"
-        echo "TELEGRAM_BOT_TOKEN=\"$TELEGRAM_BOT_TOKEN\"" >> "$CONFIG_FILE"
-        echo "TELEGRAM_CHAT_ID=\"$TELEGRAM_CHAT_ID\"" >> "$CONFIG_FILE"
-        echo "LOG_RETENTION_DAYS=\"${LOG_RETENTION_DAYS:-30}\"" >> "$CONFIG_FILE"
-        
-        echo ""
-        echo "Configuration saved successfully to $CONFIG_FILE"
-        echo "You can now start the systemd service!"
-        exit 0
-    else
-        echo "Error: $CONFIG_FILE not found."
-        echo "Please run the script interactively with sudo first to configure it."
-        exit 1
-    fi
+    echo "Error: Configuration file $CONFIG_FILE not found."
+    echo "Please run 'sudo ./install.sh' to configure and install the service."
+    exit 1
 fi
 
 # Load Configuration

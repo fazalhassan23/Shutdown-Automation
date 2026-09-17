@@ -7,6 +7,13 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ---
 
+## [1.2.0] - 2026-09-17
+
+### Added
+- **Unified Installer:** Added a single `install.sh` script to cleanly configure and set up both the backend daemon and the web interface as systemd services.
+- **Customizable Web Port:** The installer now asks for the desired port for the Web UI to run on, rather than hardcoding port 8080.
+- **Uninstaller:** Added `uninstall.sh` to safely and cleanly remove all services and configurations from the system.
+
 ## [1.1.0] - 2026-09-16
 
 ### Added

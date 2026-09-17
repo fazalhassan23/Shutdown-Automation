@@ -33,28 +33,35 @@ Running a headless server often requires protection against unexpected power cut
 
 ## 3. Installation Instructions
 
-Follow these steps to deploy this script on your headless Ubuntu server.
+> **Note:** The installer must be run with sudo to set up systemd services and properly configure the environment.
 
-### Step 1: Copy the Script
-Move the script to a standard location like `/opt/`. You can use SCP or just create the file on your server.
+1. **Clone the Repository**
+   ```bash
+   git clone https://github.com/fazalhassan23/Shutdown-Automation.git
+   cd Shutdown-Automation
+   ```
 
+2. **Run the Interactive Installer**
+   ```bash
+   sudo ./install.sh
+   ```
+   The installer will prompt you for:
+   - **Username**: For storing log files (`/home/<username>/shutdown_logs/`).
+   - **Smart Plug IP Address**: The device to monitor (e.g. `192.168.1.100`).
+   - **Ping Interval**: How often to check if the device is alive (e.g. `30` seconds).
+   - **Timeout Limit**: How long the device can be unreachable before triggering shutdown (e.g. `300` seconds).
+   - **Shutdown Delay**: Once triggered, how long to wait before the OS fully turns off (e.g. `1` minute).
+   - **Web Interface Port**: The port for the dashboard (e.g. `8080`).
+   - **Telegram Notifications**: (Optional) For alerts.
+   - **Log Retention**: (Optional) Keep daily logs clean.
+
+3. **That's it!**
+   The installer automatically copies files to `/opt/server-auto-shutdown/`, generates your config at `/etc/server-auto-shutdown.conf`, and enables/starts the background services.
+
+### Uninstallation
+If you ever want to completely remove the scripts, services, and configurations:
 ```bash
-sudo mkdir -p /opt/server-auto-shutdown
-sudo cp auto_shutdown.sh /opt/server-auto-shutdown/
-sudo chmod +x /opt/server-auto-shutdown/auto_shutdown.sh
-```
-
-### Step 2: Setup the Background Services
-To ensure the scripts run automatically in the background even if your server reboots, install the provided `systemd` services.
-
-```bash
-sudo cp auto_shutdown.service /etc/systemd/system/
-sudo cp auto_shutdown_web.service /etc/systemd/system/
-sudo systemctl daemon-reload
-sudo systemctl enable auto_shutdown.service
-sudo systemctl start auto_shutdown.service
-sudo systemctl enable auto_shutdown_web.service
-sudo systemctl start auto_shutdown_web.service
+sudo ./uninstall.sh
 ```
 
 ---

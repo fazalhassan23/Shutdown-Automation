@@ -7,7 +7,6 @@ import subprocess
 import glob
 from datetime import datetime, timedelta
 
-PORT = 8080
 CONFIG_FILE = "/etc/server-auto-shutdown.conf"
 STATE_FILE = "/tmp/auto_shutdown.state"
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -183,6 +182,8 @@ class APIHandler(http.server.SimpleHTTPRequestHandler):
             self.end_headers()
 
 if __name__ == "__main__":
+    config = read_config()
+    PORT = int(config.get("WEB_PORT", 8080))
     print(f"Starting web interface on port {PORT}...")
     server = http.server.ThreadingHTTPServer(('', PORT), APIHandler)
     try:
